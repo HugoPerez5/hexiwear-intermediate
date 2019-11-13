@@ -8,7 +8,6 @@ var Hexiwear = function () {
 
     var MOTION_SERVICE = "00002000-0000-1000-8000-00805f9b34fb";
     var ACCELEROMETER = "00002001-0000-1000-8000-00805f9b34fb";
-	//here
     var HEART_RATE = "00002021-0000-1000-8000-00805f9b34fb";
     var BATTERY = "00002a19-0000-1000-8000-00805f9b34fb";
 
@@ -31,6 +30,8 @@ var Hexiwear = function () {
         self.deviceInformationService = undefined;
         self.motionService = undefined;
         self.motionData = {};
+        self.deviceInfoData = {manufacturerName: undefined, hardware: undefined, firmware:undefined, batteryData: undefined, modeData: undefined};
+        self.healthData = {heart_rate: undefined, steps: undefined, calorie: undefined};
         self.name = undefined;
         self.id = undefined;
         self.manufacturerName = undefined;
@@ -72,7 +73,15 @@ var Hexiwear = function () {
                         .then(function (service) {
                         	self.motionService = service;
 							self.readMotion();
-                        })
+                        }),
+                    server.getPrimaryService(BATT_SERVICE)
+                        .then(function (service){
+                            self.readBattery(service);
+                        }),
+                    server.getPrimaryService(HEALT_SERVICE)
+                        .then(function (service){
+                            self.readHealth();
+                        })    
                 ]);
                 /* Error handling function */
             }, function (error) {
@@ -119,31 +128,44 @@ var Hexiwear = function () {
             	})
            		.catch(function(error) {
                 	console.log('Reading motion data failed. Error: ' + JSON.stringify(error));
-            	});
-			//HR
-            self.motionService.getCharacteristic(HEART_RATE)
-            .then(function(characteristic){
-                return characteristic.readValue();
-            })
-            .then(function(data){
-                self.motionData.hr = data.getInt16;
-            })
-            .catch(function(error){
-                console.log('reading motion data failed .Error: ' + JSON-stringify(error));
-            });
-            //Battery level
-            self.motionService.getCharacteristic(BATTERY)
-            .then(function(characteristic){
-                return characteristic.readValue();
-            })
-            .then(function(data){
-                self.motionData.btt = data.getInt16;
-            })
+                })
             .catch(function(error){
                 console.log('reading motion data failed .Error: ' + JSON-stringify(error));
             });
 		}
-	}
+    }
+    //HR
+    Hexiwear.prototype.readHealth = function(){
+        if(self.healthData){
+            self.healthData.getCharacteristic(HEART_RATE)
+                .then(function(data){
+                    self.healthData.hr = data.getInt16();
+                    self.updateUI();
+                })
+                .catch(function(error) {
+                	console.log('Reading HR data failed. Error: ' + JSON.stringify(error));
+                })
+            .catch(function(error){
+                console.log('reading HR data failed .Error: ' + JSON-stringify(error));
+            });
+        }
+    }
+    //BATTERY LEVEL
+    Hexiwear.prototype.readBattery = function(){
+        if(self.deviceInfoData){
+            self.deviceInfoData.getCharacteristic(BATTERY)
+                .then(function(data){
+                    self.deviceInfoData.bt = data.getInt16();
+                    self.updateUI();
+                })
+                .catch(function(error) {
+                    console.log('Reding battery data failed. Error: ' + JSON.stringify(error));
+                })
+            .catch(function(error){
+                console.log('Reading battery data failed. Error: ' + JSON.stringify(error));
+            });
+        }
+    }
 
     /* Refresh function for updating data */
     Hexiwear.prototype.refreshValues = function() {
