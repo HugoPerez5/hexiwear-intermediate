@@ -8,6 +8,10 @@ var Hexiwear = function () {
 
     var MOTION_SERVICE = "00002000-0000-1000-8000-00805f9b34fb";
     var ACCELEROMETER = "00002001-0000-1000-8000-00805f9b34fb";
+	//here
+    var HEART_RATE = "00002021-0000-1000-8000-00805f9b34fb";
+    var BATTERY = "00002a19-0000-1000-8000-00805f9b34fb";
+
     
     var DEVICE_NAME = 'HEXIWEAR';
 
@@ -116,6 +120,28 @@ var Hexiwear = function () {
            		.catch(function(error) {
                 	console.log('Reading motion data failed. Error: ' + JSON.stringify(error));
             	});
+			//HR
+            self.motionService.getCharacteristic(HEART_RATE)
+            .then(function(characteristic){
+                return characteristic.readValue();
+            })
+            .then(function(data){
+                self.motionData.hr = data.getInt16;
+            })
+            .catch(function(error){
+                console.log('reading motion data failed .Error: ' + JSON-stringify(error));
+            });
+            //Battery level
+            self.motionService.getCharacteristic(BATTERY)
+            .then(function(characteristic){
+                return characteristic.readValue();
+            })
+            .then(function(data){
+                self.motionData.btt = data.getInt16;
+            })
+            .catch(function(error){
+                console.log('reading motion data failed .Error: ' + JSON-stringify(error));
+            });
 		}
 	}
 
