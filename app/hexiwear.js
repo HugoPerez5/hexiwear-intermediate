@@ -30,8 +30,9 @@ var Hexiwear = function () {
         self.deviceInformationService = undefined;
         self.motionService = undefined;
         self.motionData = {};
-        self.deviceInfoData = {manufacturerName: undefined, hardware: undefined, firmware:undefined, batteryData: undefined, modeData: undefined};
-        self.healthData = {heart_rate: undefined, steps: undefined, calorie: undefined};
+        self.deviceInfoData = undefined;
+        self.batteryData = {};
+        self.healthData = undefined;
         self.name = undefined;
         self.id = undefined;
         self.manufacturerName = undefined;
@@ -74,8 +75,9 @@ var Hexiwear = function () {
                         	self.motionService = service;
 							self.readMotion();
                         }),
-                    server.getPrimaryService(BATT_SERVICE)
+                    server.getPrimaryService(BATTERY)
                         .then(function (service){
+                            console.log("Battery Service");
                             self.readBattery(service);
                         }),
                     server.getPrimaryService(HEALT_SERVICE)
@@ -151,11 +153,11 @@ var Hexiwear = function () {
         }
     }
     //BATTERY LEVEL
-       Hexiwear.prototype.readBattery = function(service){
+    Hexiwear.prototype.readBattery = function(service){
         if(self.deviceInfoData){
             self.deviceInfoData.getCharacteristic(BATTERY)
                 .then(function(data){
-                    self.deviceInfoData.batteryData = value.getUint8(0);
+                    self.batteryData = value.getUint8(0);
                     self.updateUI();
                 })
                 .catch(function(error) {
