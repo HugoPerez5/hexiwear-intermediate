@@ -152,6 +152,21 @@ var Hexiwear = function () {
     }
     //BATTERY LEVEL
        Hexiwear.prototype.readBattery = function(service){
+        if(self.deviceInfoData){
+            self.deviceInfoData.getCharacteristic(BATTERY)
+                .then(function(data){
+                    self.deviceInfoData.batteryData = value.getUint8(0);
+                    self.updateUI();
+                })
+                .catch(function(error) {
+                    console.log('Reding battery data failed. Error: ' + JSON.stringify(error));
+                })
+            .catch(function(error){
+                console.log('Reading battery data failed. Error: ' + JSON.stringify(error));
+            });
+        }
+    }/*
+    Hexiwear.prototype.readBattery = function(service){
         service,getCharacteristic(BATTERY)
         .then(function(characteristic){
             characteristic.readValue()
@@ -170,7 +185,7 @@ var Hexiwear = function () {
             console.log('Reading battery data failed. Error: ' + JSON.stringify(error));
         });
     });
-}
+}*/
 
     /* Refresh function for updating data */
     Hexiwear.prototype.refreshValues = function() {
